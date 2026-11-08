@@ -1,11 +1,43 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <header>
+    <nav>
+      <RouterLink to="/">Inicio</RouterLink> | 
+      <RouterLink to="/task/1">Detalle (Prueba)</RouterLink>
+    </nav>
+  </header>
+
+  <main>
+    <RouterView />
+  </main>
 </template>
 
-<style scoped></style>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+nav {
+  background-color: #42b883;
+  padding: 15px;
+  text-align: center;
+}
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0 10px;
+}
+nav a.router-link-exact-active {
+  text-decoration: underline;
+}
+main {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+</style>
