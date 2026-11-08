@@ -1,0 +1,35 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Estudiar Vue",
+      "description": "Aprender componentes y props",
+      "completed": false
+    },
+    {
+      "id": "2",
+      "title": "Realizar deber",
+      "description": "Completar el trabajo de programación",
+      "completed": true
+    },
+    {
+      "id": "3",
+      "title": "Revisar TypeScript",
+      "description": "Practicar interfaces y tipos",
+      "completed": false
+    },
+    {
+      "title": "Prueba CRUD editada",
+      "description": "",
+      "completed": true,
+      "id": "5KhW24fz-VQ"
+    },
+    {
+      "title": "Prueba Conexion API EDITADA",
+      "description": "",
+      "completed": true,
+      "id": "9lmtEnqdu3g"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

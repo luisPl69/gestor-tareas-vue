@@ -4,6 +4,7 @@ import type { Task } from "../../types/task";
 
 const props = defineProps<{
   task?: Task | null;
+  saving?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -61,8 +62,8 @@ function saveTask() {
     ></textarea>
 
     <div class="form-actions">
-      <button type="submit">
-        {{ task ? "Guardar cambios" : "Agregar tarea" }}
+      <button type="submit" :disabled="saving">
+        {{ saving ? 'Guardando...' : task ? "Guardar cambios" : "Agregar tarea" }}
       </button>
 
       <button v-if="task" type="button" @click="emit('cancel')">

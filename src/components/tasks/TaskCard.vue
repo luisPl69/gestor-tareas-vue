@@ -6,9 +6,9 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  toggle: [id: number];
+  toggle: [id: string];
   edit: [task: Task];
-  delete: [id: number];
+  delete: [id: string];
 }>();
 </script>
 

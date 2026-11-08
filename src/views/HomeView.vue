@@ -1,87 +1,86 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import type { Task, TaskFilter } from "../types/task";
+import { ref, computed, onMounted } from "vue";
+import {storeToRefs} from 'pinia';
+import {useTaskStore} from '../stores/tasks';
+import type { Task, TaskData, TaskFilter } from "../types/task";
 
 import TaskCard from "../components/tasks/TaskCard.vue";
 import TaskFilters from "../components/tasks/TaskFilters.vue";
 import TaskForm from "../components/tasks/TaskForm.vue";
 
-// Datos temporales para probar la interfaz
-const tasks = ref<Task[]>([
-  {
-    id: 1,
-    title: "Estudiar Redes",
-    description: "Aprender ipv6.",
-    completed: false,
-  },
-  {
-    id: 2,
-    title: "Entregar trabajo de probabilidad",
-    description:
-      "Hacer el trabajo de probabilidad y entregarlo antes del viernes.",
-    completed: true,
-  },
-  {
-    id: 3,
-    title: "Revisar Programación web",
-    description: "Revisar el proyecto de programación web.",
-    completed: false,
-  },
-]);
+const taskStore = useTaskStore();
+const { tasks, loading, error } = storeToRefs(taskStore);
+const saving = ref(false);
 
-const filter = ref<TaskFilter>("all");
+const filter = ref<TaskFilter>('all');
 const editingTask = ref<Task | null>(null);
+const actionError = ref('');
 
-// Aplicar el filtro seleccionado
+// Cargar las tareas al abrir la página
+onMounted(() => {
+  taskStore.fetchTasks();
+});
+
+// Filtrar tareas
 const filteredTasks = computed(() => {
-  if (filter.value === "pending") {
-    return tasks.value.filter((task) => !task.completed);
+  if (filter.value === 'pending') {
+    return tasks.value.filter(task => !task.completed);
   }
 
-  if (filter.value === "completed") {
-    return tasks.value.filter((task) => task.completed);
+  if (filter.value === 'completed') {
+    return tasks.value.filter(task => task.completed);
   }
 
   return tasks.value;
 });
 
-// Crear o editar una tarea
-function saveTask(data: Omit<Task, "id">) {
-  if (editingTask.value) {
-    const task = tasks.value.find((task) => task.id === editingTask.value?.id);
+// Crear o editar
 
-    if (task) {
-      Object.assign(task, data);
+async function saveTask(data: TaskData) {
+  if (saving.value) return;
+
+  saving.value = true;
+  actionError.value = '';
+
+  try {
+    if (editingTask.value) {
+      await taskStore.editTask(editingTask.value.id, data);
+      editingTask.value = null;
+    } else {
+      await taskStore.addTask(data);
     }
-
-    editingTask.value = null;
-    return;
+  } catch {
+    actionError.value = 'No se pudo guardar la tarea';
+  } finally {
+    saving.value = false;
   }
-
-  const newTask: Task = {
-    id: Date.now(),
-    ...data,
-  };
-
-  tasks.value.push(newTask);
 }
 
+
 // Seleccionar tarea para editar
-function editTask(task: Task) {
+function selectTask(task: Task) {
   editingTask.value = { ...task };
 }
 
 // Eliminar tarea
-function deleteTask(id: number) {
-  tasks.value = tasks.value.filter((task) => task.id !== id);
+async function removeTask(id: string) {
+  actionError.value = '';
+
+  try {
+    await taskStore.removeTask(id);
+  } catch {
+    actionError.value = 'No se pudo eliminar la tarea';
+  }
 }
 
-// Cambiar estado de una tarea
-function toggleTask(id: number) {
-  const task = tasks.value.find((task) => task.id === id);
+// Cambiar estado
+async function toggleTask(id: string) {
+  actionError.value = '';
 
-  if (task) {
-    task.completed = !task.completed;
+  try {
+    await taskStore.toggleTask(id);
+  } catch {
+    actionError.value = 'No se pudo cambiar el estado';
   }
 }
 </script>
@@ -92,26 +91,35 @@ function toggleTask(id: number) {
 
     <TaskForm
       :task="editingTask"
+      :saving="saving"
       @save="saveTask"
       @cancel="editingTask = null"
     />
+
+    <p v-if="actionError" role="alert">{{ actionError }}</p>
 
     <TaskFilters v-model="filter" />
 
     <h2>Mis tareas ({{ filteredTasks.length }})</h2>
 
-    <div v-if="filteredTasks.length">
-      <TaskCard
-        v-for="task in filteredTasks"
-        :key="task.id"
-        :task="task"
-        @toggle="toggleTask"
-        @edit="editTask"
-        @delete="deleteTask"
-      />
-    </div>
+    <p v-if="loading">Cargando tareas...</p>
 
-    <p v-else>No hay tareas para mostrar.</p>
+    <p v-else-if="error" role="alert">{{ error }}</p>
+
+    <template v-else>
+      <div v-if="filteredTasks.length">
+        <TaskCard
+          v-for="task in filteredTasks"
+          :key="task.id"
+          :task="task"
+          @toggle="toggleTask"
+          @edit="selectTask"
+          @delete="removeTask"
+        />
+      </div>
+
+      <p v-else>No hay tareas para mostrar.</p>
+    </template>
   </main>
 </template>
 
