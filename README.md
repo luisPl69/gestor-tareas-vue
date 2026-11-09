@@ -181,6 +181,255 @@ Los componentes de Vue 3 permiten organizar una aplicación en elementos reutili
 - [Vue.js – Renderizado condicional](https://vuejs.org/guide/essentials/conditional.html)
 - [Vue.js – Ciclo de vida](https://vuejs.org/guide/essentials/lifecycle.html)
 
+## Bloque 4. Reactividad, estado y navegación
+
+### 4.1. Reactividad en Vue 3
+
+La reactividad de Vue 3 permite que la información que vemos en pantalla se actualice automáticamente cuando cambian los datos. Así, no tenemos que modificar el HTML a mano después de cada operación.
+
+En el gestor de tareas usamos esta función para mostrar las tareas que llegan de la API, indicar si están completadas y aplicar filtros. También permite mostrar mensajes mientras se cargan los datos o cuando ocurre un error. Por ejemplo, al marcar una tarea como completada, el cambio aparece en la lista que ve el usuario.
+
+### 4.2. Uso de `ref()` y `reactive()`
+
+Para que Vue detecte los cambios en los datos, podemos usar funciones como `ref()` y `reactive()`.
+
+#### `ref()`
+
+Con `ref()` podemos guardar un dato y hacer que Vue detecte sus cambios. Sirve para valores simples, listas u objetos. Para leer o cambiar ese dato desde TypeScript, usamos `.value`.
+
+```ts
+import { ref } from 'vue'
+
+const loading = ref(false)
+loading.value = true
+```
+
+En el proyecto guardamos la lista de tareas y los datos de carga y error en un store, que es donde reunimos la información que comparten los componentes:
+
+```ts
+const tasks = ref<Task[]>([])
+const loading = ref(false)
+const error = ref('')
+```
+
+Cuando cambia alguno de estos valores, Vue actualiza los componentes que lo usan.
+
+#### `reactive()`
+
+`reactive()` permite trabajar con un objeto cuyos cambios también detecta Vue. Podemos acceder a sus propiedades directamente, sin escribir `.value` en cada una.
+
+```ts
+import { reactive } from 'vue'
+
+const formulario = reactive({
+  title: '',
+  description: '',
+  completed: false
+})
+
+formulario.title = 'Estudiar Vue'
+```
+
+Este ejemplo explica cómo funciona `reactive()`, aunque no lo incorporamos al gestor de tareas. En el proyecto elegimos `ref()` porque cubría lo que necesitábamos y era fácil de entender.
+
+### 4.3. Datos compartidos con Pinia
+
+Pinia permite reunir en un mismo lugar los datos y las operaciones que necesitan varios componentes de Vue. Para ello, creamos el archivo `src/stores/tasks.ts`, donde definimos el store `useTaskStore`.
+
+El store guarda estos datos:
+
+| Dato | Para qué sirve |
+|---|---|
+| `tasks` | Guarda la lista de tareas. |
+| `loading` | Indica si se están cargando las tareas. |
+| `error` | Guarda un mensaje de error cuando falla la consulta. |
+
+También incluye las acciones `fetchTasks`, `addTask`, `editTask`, `removeTask` y `toggleTask`. Estas usan el servicio HTTP, que se encarga de comunicarse con el servidor, para consultar o modificar las tareas.
+
+Una versión simplificada del store es:
+
+```ts
+export const useTaskStore = defineStore('tasks', () => {
+  const tasks = ref<Task[]>([])
+  const loading = ref(false)
+  const error = ref('')
+
+  return { tasks, loading, error }
+})
+```
+
+En `HomeView.vue` usamos el store para obtener las tareas y trabajar con ellas. Las solicitudes HTTP quedan fuera de esta vista, lo que ayuda a mantener el código organizado.
+
+### 4.4. Vue Router y navegación
+
+Vue Router permite pasar de una vista a otra sin recargar toda la aplicación. En el proyecto configuramos estas rutas:
+
+| Ruta | Vista | Para qué sirve |
+|---|---|---|
+| `/` | `HomeView.vue` | Mostrar y administrar las tareas. |
+| `/task/:id` | `TaskDetailView.vue` | Mostrar la vista de una tarea concreta. |
+
+La parte `:id` cambia según la tarea seleccionada y permite identificarla. Desde la tarjeta de una tarea podemos crear un enlace con `RouterLink`:
+
+```vue
+<RouterLink :to="`/task/${task.id}`">
+  Ver detalle
+</RouterLink>
+```
+
+`RouterView` indica en qué parte de la pantalla se muestra la vista de la ruta actual.
+
+
+## Bloque 5. Conexión con la API REST y operaciones CRUD
+
+### 5.1. Conexión con una API REST
+
+Una API REST permite que la aplicación envíe y reciba información mediante solicitudes HTTP, es decir, peticiones al servidor. En el proyecto usamos JSON Server para disponer de una API a partir del archivo `db.json`, sin tener que programar toda la parte del servidor.
+
+Para iniciar el servidor, ejecutamos:
+
+```bash
+npx json-server db.json --port 3000
+```
+
+La lista de tareas se consulta en esta dirección:
+
+```text
+http://localhost:3000/tasks
+```
+
+Cada tarea tiene las propiedades `id`, `title`, `description` y `completed`, que corresponden a su identificador, título, descripción y estado de finalización:
+
+```json
+{
+  "id": "1",
+  "title": "Estudiar Vue",
+  "description": "Repasar conceptos de reactividad",
+  "completed": false
+}
+```
+
+Reunimos el código que se comunica con el servidor en `src/services/taskService.ts`. Allí usamos `fetch()` para hacer las solicitudes y comprobamos `response.ok` para detectar si el servidor devuelve una respuesta de error.
+
+
+![Respuesta JSON de la API](docs/img/json.png)
+
+### 5.2. Operaciones CRUD
+
+CRUD es el nombre que agrupa cuatro operaciones: crear, leer, actualizar y eliminar información. En el proyecto las implementamos de esta manera:
+
+| Operación | Método HTTP | Función del servicio | Resultado |
+|---|---|---|---|
+| Crear | `POST` | `createTask()` | Guarda una tarea nueva. |
+| Leer | `GET` | `getTasks()` | Obtiene las tareas guardadas. |
+| Actualizar | `PATCH` | `updateTask()` | Edita una tarea o cambia su estado. |
+| Eliminar | `DELETE` | `deleteTask()` | Elimina una tarea. |
+
+### Consultar las tareas
+
+Usamos una solicitud GET para obtener la lista guardada en JSON Server:
+
+```ts
+const response = await fetch('http://localhost:3000/tasks')
+
+if (!response.ok) {
+  throw new Error('Error al obtener tareas')
+}
+
+const tasks = await response.json()
+```
+
+### Crear una tarea
+
+Al crear una tarea, enviamos su título, descripción y estado mediante POST. JSON Server genera el identificador, por lo que el formulario no necesita calcularlo.
+
+### Actualizar una tarea
+
+Usamos PATCH para cambiar los datos de una tarea existente. Con esta operación podemos editar el título o la descripción y cambiar la propiedad `completed` entre `true` y `false` para marcar la tarea como completada o pendiente.
+
+### Eliminar una tarea
+
+Para borrar una tarea, enviamos una solicitud DELETE con su identificador. Cuando el servidor responde, el store actualiza la lista que aparece en pantalla.
+
+### Tipo de identificador
+
+Al principio, los datos temporales tenían identificadores numéricos. Durante la integración cambiamos el tipo a `string`, porque JSON Server devuelve identificadores de texto que pueden combinar letras y números.
+
+```ts
+export interface Task {
+  id: string
+  title: string
+  description: string
+  completed: boolean
+}
+```
+
+Así, la API, los servicios, Pinia y los componentes trabajan con el mismo tipo de identificador.
+Creación de una tarea 
+![Operaciones CRUD en la interfaz](docs/img/crud-tarea1.png)
+![Operaciones CRUD en la interfaz](docs/img/tarea1.png)
+Modificacion de tarea
+![Operaciones CRUD en la interfaz](docs/img/crud-tarea2.png)
+![Operaciones CRUD en la interfaz](docs/img/tarea2.png)
+
+
+
+
+## 5.3. Errores y mensajes de carga
+
+Las solicitudes al servidor pueden fallar si este no está disponible o devuelve una respuesta incorrecta. Para manejar estos casos, comprobamos las respuestas y usamos bloques `try/catch`, que permiten detectar los errores y decidir qué hacer cuando ocurren.
+
+En el store, `loading` indica cuándo se están consultando las tareas y `error` guarda el mensaje que se muestra si la carga falla.
+
+Si detenemos JSON Server y actualizamos la aplicación, aparece este mensaje:
+
+"No se pudieron cargar las tareas"
+
+También manejamos los errores al guardar o eliminar una tarea, para que el usuario reciba un mensaje y sepa que la operación falló.
+
+![Mensaje de error de conexión](docs/img/error-conexion.png)
+
+### 5.4. Pruebas manuales y resultados
+
+Probamos las funciones desde la aplicación Vue y revisamos que los cambios también aparecieran en la respuesta de JSON Server.
+
+| Prueba realizada | Resultado |
+|---|---|
+| Consultar las tareas desde la API | Correcto |
+| Crear una tarea nueva | Correcto |
+| Editar una tarea existente | Correcto |
+| Marcar una tarea como completada | Correcto |
+| Eliminar una tarea | Correcto |
+| Mantener los cambios después de actualizar la página | Correcto |
+| Mostrar un error cuando JSON Server está detenido | Correcto |
+
+También ejecutamos `npm run build`. El comando terminó correctamente: el proyecto pasó la revisión de tipos de datos y generó los archivos para su publicación. Además, ejecutamos `npm run test:unit -- --run`, que aprobó una prueba inicial para comprobar que `App.vue` se monta, es decir, que el componente principal se puede cargar.
+
+### 5.5. Dificultades encontradas y soluciones
+
+Al principio usamos `number` para los identificadores de las tareas temporales. Al conectar la aplicación con JSON Server, encontramos que los identificadores eran de texto. Lo resolvimos definiendo `id: string` y usando ese mismo tipo en los componentes, los servicios y el store.
+
+Durante la compilación apareció el error `Cannot find name 'TaskData'` en `HomeView.vue`. Faltaba importar el tipo `TaskData` desde `src/types/task.ts`. Después de añadirlo, `npm run build` terminó sin errores.
+### 5.6. Conclusiones de los bloques 4 y 5
+
+La reactividad de Vue 3 permitió que la pantalla del gestor de tareas se actualizara al cambiar los datos. Con `ref()` manejamos la lista de tareas y los datos de carga y error. Pinia reunió en un mismo lugar las operaciones compartidas por los componentes.
+
+Vue Router permitió organizar la navegación entre la página principal y la ruta de detalle. La conexión con JSON Server mediante `fetch()` hizo posible crear, consultar, actualizar y eliminar tareas, además de conservar los cambios al actualizar la página.
+
+Las pruebas manuales confirmaron que podemos consultar, crear, editar, completar y eliminar tareas. También comprobamos que la aplicación muestra un mensaje cuando no puede comunicarse con el servidor.
+
+### Archivos principales de los bloques 4 y 5
+
+| Archivo | Para qué sirve |
+|---|---|
+| `src/types/task.ts` | Define los tipos de datos de las tareas. |
+| `src/stores/tasks.ts` | Reúne los datos y las acciones compartidas con Pinia. |
+| `src/services/taskService.ts` | Se comunica con JSON Server mediante solicitudes HTTP. |
+| `src/views/HomeView.vue` | Conecta el store con la pantalla principal. |
+| `src/router/index.ts` | Define las rutas de navegación. |
+| `src/main.ts` | Registra Pinia y Vue Router en la aplicación. |
+| `db.json` | Guarda las tareas que utiliza JSON Server. |
+
 
 ## Bloque 6: Pruebas
 
