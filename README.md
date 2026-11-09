@@ -548,3 +548,45 @@ En la vista móvil aparece una barra de desplazamiento horizontal en pantallas a
 | Dificultad percibida (1 a 5) | [promedio de los 4] | |
 
 Lighthouse se midió con la API despierta. Accessibility dio 88 y 89, Best Practices 100 y SEO 82.
+
+## Uso de Inteligencia Artificial en el Desarrollo
+
+**Justificación metodológica**  
+La inteligencia artificial se utilizó estrictamente como una herramienta de apoyo pedagógico, de depuración técnica y de optimización del flujo de trabajo. Su función se limitó a explicar conceptos teóricos de Vue 3 y TypeScript, resolver errores específicos del entorno (como conflictos de Git en Windows o dependencias de Node) y proponer estructuras de pruebas unitarias. En ningún caso se delegó la lógica de negocio, la arquitectura del estado con Pinia o la redacción final del código, los cuales fueron desarrollados, comprendidos y validados manualmente por cada integrante del equipo para garantizar el dominio real de la materia.
+
+**Consultas realizadas por integrante**
+
+**Integrante 1 (Configuración, Enrutamiento y Documentación Inicial)**  
+- Resolución de congelamiento de terminal en Git Bash durante `npm create vue@latest`.  
+- Solución al error `fatal: detected dubious ownership in repository` en Windows.  
+- Manejo de rechazos en `git push` por conflictos con el README inicial remoto (non-fast-forward) y uso seguro de `git push --force`.  
+- Diferenciación arquitectónica entre las carpetas `views` y `components`.  
+- Configuración desde cero de `router/index.ts` con `createWebHistory` para `HomeView` y `TaskDetailView`.  
+- Redacción en Markdown de los Bloques 1 y 2, documentando los errores de permisos.
+
+**Integrante 2 (Fundamentos de Vue 3 y TypeScript)**  
+- Estructura básica y flujo de trabajo de Vue 3.  
+- Organización y comunicación de componentes mediante `props` y `emit`.  
+- Mecanismos de reactividad: uso y diferencia entre `ref()`, `computed()` y `watch()`.  
+- Manejo de formularios con `v-model` y lógica para actualizar datos al editar.  
+- Definición de interfaces y tipos de datos en TypeScript.  
+- Ejecución de operaciones asíncronas con `async` y `await`.  
+- Directivas de renderizado (`v-for`, `v-if`) y manejo de eventos (`@click`).
+
+**Integrante 3 (Gestión de Datos y Red)**  
+- Gestión de peticiones HTTP y control de flujo con la Fetch API.  
+- Estrategias para capturar y manejar errores de red en solicitudes asíncronas.
+
+**Integrante 4 (Pruebas, Despliegue y Flujo de Trabajo)**  
+- Preparación del entorno (clonado, ramas, dependencias) sin afectar el repositorio compartido.  
+- Verificación de la coexistencia de `json-server` y Vite en desarrollo.  
+- Justificación de la restauración de `db.json` antes de cada commit para mantener la integridad de las pruebas.  
+- Redacción y explicación línea por línea de pruebas unitarias en Vitest para `TaskCard`, `TaskFilters`, `TaskForm` y el store de Pinia (con `vi.mock`).  
+- Explicación del entorno `jsdom` para ejecutar pruebas sin navegador ni API activa.  
+- Reemplazo limpio de `TaskDetailView.vue` sin mezclar código legado.  
+- Configuración del servicio en Render para `json-server` y uso de variables de entorno (`VITE_API_URL`) con `vercel.json`.  
+- Medición de líneas de código en Windows con `cloc.exe` y análisis del tamaño de la carpeta `dist`.  
+- Autenticación y despliegue a producción con Vercel CLI desde la carpeta local.  
+- Verificación de la URL pública (CRUD, recarga en `/task/1`) y medición de Lighthouse en modo móvil.  
+- Ensamblaje de los Bloques 6 y 7 del README sin sobrescribir el trabajo de los compañeros.  
+- Creación de Pull Request, fusión a `main` y actualización local sin pérdida de archivos.
