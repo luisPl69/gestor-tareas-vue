@@ -14,6 +14,14 @@
   - `src/stores`: Para el estado global con Pinia.
   - `src/router`: Para la configuración de rutas.
 - **Error común y solución:** Al inicializar Git, tuvimos un error de permisos en Windows (`dubious ownership`). Lo solucionamos marcando la carpeta como segura con el comando: `git config --global --add safe.directory [ruta_del_proyecto]`.
+- **Tiempo de configuración:** 15 minutos, desde `npm create vue@latest` hasta ver el servidor corriendo en `localhost:5173`, incluyendo la resolución del error de permisos de Git.
+- **Otro error real:** al escribir mal el comando (`npm cretae vue@latest`) apareció `Unknown command: "cretae"`. Se corrigió escribiendo `npm create vue@latest`.
+
+![Creación del proyecto con create-vue](docs/img/17-instalacion-create-vue.png)
+
+![Servidor de desarrollo corriendo en localhost:5173](docs/img/18-vite-corriendo.png)
+
+| Tiempo de configuración inicial (min) | 15 | `docs/img/17-instalacion-create-vue.png`, `docs/img/18-vite-corriendo.png` |
 
 ## Bloque 3. Componentes en Vue 3
 
