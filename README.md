@@ -169,13 +169,18 @@ De esta manera, no es necesario crear un componente diferente para cada tarea. E
 
 ### 3.7. Problemas encontrados
 
-Durante el desarrollo se debe registrar cualquier inconveniente real relacionado con los componentes, sus propiedades, eventos o integración.
+Durante el desarrollo se presentaron algunos inconvenientes relacionados con el funcionamiento de los componentes.
 
-**Error encontrado:** [Escribir aquí el error que realmente ocurrió durante el desarrollo].
+Error encontrado 1: Al trabajar con el formulario de tareas, fue necesario sincronizar los campos de título y descripción con la información de la tarea seleccionada para editar. Sin esta sincronización, el formulario podía conservar los datos anteriores o aparecer vacío.
 
-**Solución aplicada:** [Explicar brevemente cómo se corrigió].
+Código utilizado:
 
-Si no se presentaron errores importantes, se puede indicar que no se registraron inconvenientes relevantes durante las pruebas.
+```vue
+watch( () => props.task, (task) => { title.value = task?.title ?? "";
+description.value = task?.description ?? ""; }, { immediate: true }, );
+```
+
+Solución aplicada: Se utilizó watch() para detectar los cambios en la tarea recibida mediante props y actualizar automáticamente los campos del formulario. También se agregó immediate: true para cargar los datos desde el inicio cuando se selecciona una tarea.
 
 ### 3.8. Conclusión
 
