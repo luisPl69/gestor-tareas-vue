@@ -1,6 +1,8 @@
 import type { Task, TaskData } from "../types/task";
 
-const API_URL = "http://localhost:3000/tasks";
+
+//CAMBIO DEL API URL POR EL RENDER.COM
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/tasks";
 
 export async function getTasks(): Promise<Task[]> {
   const response = await fetch(API_URL);
